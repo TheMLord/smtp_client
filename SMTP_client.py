@@ -29,7 +29,6 @@ def receive_response(client_socket: ssl.SSLSocket):
             print(recv_data)
         except socket.timeout:
             break
-    print(client_socket.recv(65535).decode("UTF-8"))
 
 
 def generate_boundary():
