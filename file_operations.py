@@ -1,21 +1,39 @@
+"""Модуль с методами для работы с файлами"""
 import base64
 import json
 import os
 
 
 class FileOperation:
+    """Класс с методами для работы с файлами"""
+
     @staticmethod
     def read_txt_file(file_name: str):
+        """Функция для чтения текстового файла
+
+        :param file_name: имя текстового файла, который нужно прочитать
+        :return: возвращает прочитанную из файла информацию
+        """
         with open(file_name, "r", encoding="UTF-8") as file_txt:
             return file_txt.read().strip()
 
     @staticmethod
     def read_json_file(file_name: str):
+        """Функция для чтения json-файлов
+
+        :param file_name: имя json-файла, который нужно прочитать
+        :return: возвращает словарь, прочитанный из файла
+        """
         with open(file_name, "r", encoding="UTF-8") as file_json:
             return json.load(file_json)
 
     @staticmethod
     def get_send_type_file(type_file):
+        """Функция для определения Content-type у файла
+
+        :param type_file: принимает на вход расширение файла
+        :return: возвращает Content-type
+        """
         if type_file == "txt":
             return "text/plain"
         elif type_file == "html":
@@ -47,6 +65,15 @@ class FileOperation:
 
     @staticmethod
     def prepare_files(directory_path: str):
+        """Функция подготовки файлов к отправке
+
+        Функция составляет словарь для файлов, которые нужно отправить.
+        Находится имя файла, закодированное в base64 байтовое представление файла и
+        тип файла для Content-type.
+
+        :param directory_path: директория, с файлами, которые будут отправлены
+        :return: возвращает словарь с информацией о файлах
+        """
         dict_files_info = {}
         for file_name in os.listdir(directory_path):
             path_file = os.path.join(directory_path, file_name)

@@ -1,3 +1,4 @@
+"""Модуль с классом клиента"""
 import base64
 import random
 import ssl
@@ -7,11 +8,20 @@ from file_operations import FileOperation
 
 
 def send_request(client_socket: ssl.SSLSocket, data_request: str):
+    """Функция отправки запросов на SMTP-сервер
+
+    :param client_socket: сокет
+    :param data_request: данные для отправки
+    """
     client_socket.send((data_request + '\n').encode())
     receive_response(client_socket)
 
 
 def receive_response(client_socket: ssl.SSLSocket):
+    """Функция чтения ответов от SMTP-сервера
+
+    :param client_socket: сокет
+    """
     client_socket.settimeout(0.05)
     while True:
         try:
@@ -23,6 +33,10 @@ def receive_response(client_socket: ssl.SSLSocket):
 
 
 def generate_boundary():
+    """Функция для генерации boundary
+
+    :return: сгенерированный boundary
+    """
     list_number = [n for n in range(0, 10)]
     random_number = ""
     for _ in range(6):
@@ -31,7 +45,13 @@ def generate_boundary():
 
 
 class SMTPClient:
+    """Класс клиента"""
+
     def __init__(self, config_dict: dict):
+        """Функция инициализации класса
+
+        :param config_dict: словарь с конфигурацией
+        """
         self.smtp_host = "smtp.yandex.ru"
         self.smtp_port = 465
 
@@ -43,6 +63,12 @@ class SMTPClient:
         self.send_files_dict = FileOperation.prepare_files(config_dict["path_directory_files"])
 
     def message_prepare(self, user_name_to: str, text_message: str):
+        """Функция подготовки сообщения к отправке
+
+        :param user_name_to: кому отправлять письмо
+        :param text_message: текст письма
+        :return: возвращает подготовленное к отправке сообщение
+        """
         boundary_msg = generate_boundary()
 
         # заголовки
@@ -71,6 +97,9 @@ class SMTPClient:
         return message
 
     def send_message(self):
+        """Функция отправки сообщений
+
+        """
         text_message = FileOperation.read_txt_file("msg.txt")
 
         base64login = base64.b64encode(self.user_name_from.encode()).decode()
