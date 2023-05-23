@@ -3,4 +3,5 @@ files
 config.json
 msg.txt
 password.txt
-
+.idea
+__pycache__
