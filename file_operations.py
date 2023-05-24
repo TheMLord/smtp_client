@@ -15,7 +15,7 @@ class FileOperation:
         :return: возвращает прочитанную из файла информацию
         """
         with open(file_name, "r", encoding="UTF-8") as file_txt:
-            return file_txt.read().strip()
+            return file_txt.read()
 
     @staticmethod
     def read_json_file(file_name: str):

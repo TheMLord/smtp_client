@@ -22,7 +22,7 @@ def receive_response(client_socket: ssl.SSLSocket):
 
     :param client_socket: сокет
     """
-    client_socket.settimeout(0.05)
+    client_socket.settimeout(1)
     while True:
         try:
             recv_data = client_socket.recv(1024).decode("UTF-8")
@@ -46,7 +46,7 @@ def generate_boundary():
 class SMTPClient:
     """Класс клиента"""
 
-    def __init__(self, config_dict: dict):
+    def __init__(self, config_dict: dict, file_psw: str, file_msg: str):
         """Функция инициализации класса
 
         :param config_dict: словарь с конфигурацией
@@ -54,18 +54,18 @@ class SMTPClient:
         self.smtp_host = "smtp.yandex.ru"
         self.smtp_port = 465
 
-        self.user_password = FileOperation.read_txt_file("password.txt")
+        self.user_password = FileOperation.read_txt_file(file_psw)
 
         self.user_name_from = config_dict["from"]
         self.user_name_to_list = config_dict["to"]
         self.subject_message = config_dict["subject"]
+        self.text_message = FileOperation.read_txt_file(file_msg)
         self.send_files_dict = FileOperation.prepare_files(config_dict["path_directory_files"])
 
-    def message_prepare(self, user_name_to: str, text_message: str):
+    def message_prepare(self, user_name_to: str):
         """Функция подготовки сообщения к отправке
 
         :param user_name_to: кому отправлять письмо
-        :param text_message: текст письма
         :return: возвращает подготовленное к отправке сообщение
         """
         boundary_msg = generate_boundary()
@@ -81,7 +81,7 @@ class SMTPClient:
         # тело сообщения началось
         message_body = f'--{boundary_msg}\n'
         message_body += 'Content-Type: text/plain; charset=utf-8\n\n'
-        message_body += text_message + '\n'
+        message_body += self.text_message + '\n'
         message_body += f'--{boundary_msg}\n'
         for send_file in self.send_files_dict:
             message_body += f'Content-Disposition: attachment;\n' \
@@ -99,11 +99,8 @@ class SMTPClient:
         """Функция отправки сообщений
 
         """
-        text_message = FileOperation.read_txt_file("msg.txt")
-
         base64login = base64.b64encode(self.user_name_from.encode()).decode()
         base64password = base64.b64encode(self.user_password.encode()).decode()
-
         ssl_contex = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         ssl_contex.check_hostname = False
         ssl_contex.verify_mode = ssl.CERT_NONE
@@ -123,7 +120,7 @@ class SMTPClient:
                             send_request(client, f'MAIL FROM:{self.user_name_from}')
                             send_request(client, f"RCPT TO:{user_name_to}")
                             send_request(client, 'DATA')
-                            send_request(client, self.message_prepare(user_name_to, text_message))
+                            send_request(client, self.message_prepare(user_name_to))
                 except ssl.SSLError as e:
                     print(f"Ошибка SSL: {e}")
         except socket.error as e:
